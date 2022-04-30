@@ -20,6 +20,7 @@ export class App extends Component {
   };
 
   componentDidUpdate(prevProps, { pictureToFind, currentPage, pictures }) {
+    console.log('nfhfh');
     if (
       pictureToFind !== this.state.pictureToFind ||
       currentPage !== this.state.currentPage
