@@ -1,17 +1,13 @@
 import PropTypes from 'prop-types';
 import styles from './Button.module.css';
 
-export default function Button({ handleClick }) {
+export default function Button({ onClick }) {
   return (
-    <button
-      type="button"
-      className={styles.loadButton}
-      onClick={() => handleClick()}
-    >
+    <button type="button" className={styles.loadButton} onClick={onClick}>
       Load more
     </button>
   );
 }
 Button.propTypes = {
-  handleClick: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired,
 };

@@ -20,7 +20,6 @@ export class App extends Component {
   };
 
   componentDidUpdate(prevProps, { pictureToFind, currentPage, pictures }) {
-    console.log('nfhfh');
     if (
       pictureToFind !== this.state.pictureToFind ||
       currentPage !== this.state.currentPage
@@ -63,8 +62,17 @@ export class App extends Component {
         `https://pixabay.com/api/?q=${pic}&page=${pg}&key=${myKey}&image_type=photo&orientation=horizontal&per_page=12`
       )
       .then(response => {
+        const pictures = response.data.hits.map(
+          ({ id, webformatURL, tags, largeImageURL }) => ({
+            id,
+            webformatURL,
+            tags,
+            largeImageURL,
+          })
+        );
+
         this.setState(prevState => ({
-          pictures: [...prevState.pictures, ...response.data.hits],
+          pictures: [...prevState.pictures, ...pictures],
           loading: false,
           totalHits: response.data.totalHits,
         }));
@@ -108,7 +116,7 @@ export class App extends Component {
           </ImageGallery>
         )}
         {pictures.length > 0 && !loading && totalHits > currentPage * 12 && (
-          <Button handleClick={this.handleBtnClick} />
+          <Button onClick={this.handleBtnClick} />
         )}
         {loading && <Loader />}
         {currentPicture && (
