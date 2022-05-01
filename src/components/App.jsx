@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 import Searchbar from './Searchbar/Searchbar';
@@ -9,60 +9,51 @@ import Loader from './Loader/Loader';
 import Modal from './Modal/Modal';
 import '../styles.css';
 
-export class App extends Component {
-  state = {
-    pictureToFind: '',
-    pictures: [],
-    currentPage: 1,
-    currentPicture: null,
-    loading: false,
-    totalHits: null,
-  };
+export function App() {
+  const [pictureToFind, setPictureToFind] = useState('');
+  const [pictures, setPictures] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPicture, setCurrentPicture] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [totalPictureFind, setTotalPictureFind] = useState(null);
 
-  componentDidUpdate(prevProps, { pictureToFind, currentPage, pictures }) {
-    if (
-      pictureToFind !== this.state.pictureToFind ||
-      currentPage !== this.state.currentPage
-    ) {
-      this.getPicture(this.state.pictureToFind, this.state.currentPage);
+  useEffect(() => {
+    if (pictureToFind) {
+      getPicture(pictureToFind, currentPage);
     }
+  }, [currentPage, pictureToFind]);
 
-    if (
-      !this.state.loading &&
-      this.state.currentPage > 1 &&
-      pictures.length !== this.state.pictures.length
-    ) {
-      this.scroll();
+  useEffect(() => {
+    if (currentPage > 1) {
+      scroll();
     }
-  }
+  }, [currentPage, pictures.length]);
 
-  scroll() {
+  function scroll() {
     window.scrollBy({
       top: 520,
       behavior: 'smooth',
     });
   }
 
-  findPictures = pictureToFind => {
+  const findPictures = pictureToFind => {
     if (pictureToFind) {
-      this.setState({
-        pictureToFind: pictureToFind,
-        pictures: [],
-        currentPage: 1,
-        loading: true,
-        totalHits: null,
-      });
+      setPictureToFind(pictureToFind);
+      setPictures([]);
+      setCurrentPage(1);
+      setLoading(true);
+      setTotalPictureFind(null);
     }
   };
 
-  getPicture = (pic, pg) => {
+  const getPicture = (pic, pg) => {
     const myKey = '25645547-d70858bec2d16a14b7d60bc29';
     return axios
       .get(
         `https://pixabay.com/api/?q=${pic}&page=${pg}&key=${myKey}&image_type=photo&orientation=horizontal&per_page=12`
       )
       .then(response => {
-        const pictures = response.data.hits.map(
+        const foundPictures = response.data.hits.map(
           ({ id, webformatURL, tags, largeImageURL }) => ({
             id,
             webformatURL,
@@ -71,61 +62,49 @@ export class App extends Component {
           })
         );
 
-        this.setState(prevState => ({
-          pictures: [...prevState.pictures, ...pictures],
-          loading: false,
-          totalHits: response.data.totalHits,
-        }));
+        setPictures([...pictures, ...foundPictures]);
+        setLoading(false);
+        setTotalPictureFind(response.data.totalHits);
       })
       .catch(err => console.log(err));
   };
 
-  handleBtnClick = () => {
-    this.setState(({ currentPage }) => ({
-      currentPage: currentPage + 1,
-      loading: true,
-    }));
+  const handleBtnClick = () => {
+    setCurrentPage(currentPage + 1);
+    setLoading(true);
   };
 
-  openModal = picture => {
-    this.setState({ currentPicture: picture });
+  const openModal = picture => {
+    setCurrentPicture(picture);
   };
 
-  render() {
-    const {
-      pictureToFind,
-      pictures,
-      currentPicture,
-      loading,
-      totalHits,
-      currentPage,
-    } = this.state;
-
-    return (
-      <div className="app">
-        <Searchbar onSubmit={this.findPictures} />
-        {pictures.length > 0 && (
-          <ImageGallery findPicture={pictureToFind}>
-            {pictures.map(picture => (
-              <ImageGalleryItem
-                key={picture.id}
-                picture={picture}
-                onClick={this.openModal}
-              />
-            ))}
-          </ImageGallery>
+  return (
+    <div className="app">
+      <Searchbar onSubmit={findPictures} />
+      {pictures.length > 0 && (
+        <ImageGallery findPicture={pictureToFind}>
+          {pictures.map(picture => (
+            <ImageGalleryItem
+              key={picture.id}
+              picture={picture}
+              onClick={openModal}
+            />
+          ))}
+        </ImageGallery>
+      )}
+      {pictures.length > 0 &&
+        !loading &&
+        totalPictureFind > currentPage * 12 && (
+          <Button onClick={handleBtnClick} />
         )}
-        {pictures.length > 0 && !loading && totalHits > currentPage * 12 && (
-          <Button onClick={this.handleBtnClick} />
-        )}
-        {loading && <Loader />}
-        {currentPicture && (
-          <Modal
-            currentPicture={currentPicture}
-            closeModal={() => this.setState({ currentPicture: null })}
-          />
-        )}
-      </div>
-    );
-  }
+      {loading && <Loader />}
+      {currentPicture && (
+        <Modal
+          currentPicture={currentPicture}
+          this
+          closeModal={() => setCurrentPicture(null)}
+        />
+      )}
+    </div>
+  );
 }
