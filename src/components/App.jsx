@@ -46,7 +46,7 @@ export function App() {
     }
   };
 
-  const getPicture = (pic, pg) => {
+  function getPicture(pic, pg) {
     const myKey = '25645547-d70858bec2d16a14b7d60bc29';
     return axios
       .get(
@@ -54,9 +54,9 @@ export function App() {
       )
       .then(response => {
         const foundPictures = response.data.hits.map(
-          ({ id, webformatURL, tags, largeImageURL }) => ({
+          ({ id, webFormatURL, tags, largeImageURL }) => ({
             id,
-            webformatURL,
+            webFormatURL,
             tags,
             largeImageURL,
           })
@@ -67,7 +67,7 @@ export function App() {
         setTotalPictureFind(response.data.totalHits);
       })
       .catch(err => console.log(err));
-  };
+  }
 
   const handleBtnClick = () => {
     setCurrentPage(currentPage + 1);
