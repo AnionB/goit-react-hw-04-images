@@ -18,6 +18,28 @@ export function App() {
   const [totalPictureFind, setTotalPictureFind] = useState(null);
 
   useEffect(() => {
+    function getPicture(pic, pg) {
+      const myKey = '25645547-d70858bec2d16a14b7d60bc29';
+      return axios
+        .get(
+          `https://pixabay.com/api/?q=${pic}&page=${pg}&key=${myKey}&image_type=photo&orientation=horizontal&per_page=12`
+        )
+        .then(response => {
+          const foundPictures = response.data.hits.map(
+            ({ id, webformatURL, tags, largeImageURL }) => ({
+              id,
+              webformatURL,
+              tags,
+              largeImageURL,
+            })
+          );
+          setPictures(pictures => [...pictures, ...foundPictures]);
+          setLoading(false);
+          setTotalPictureFind(response.data.totalHits);
+        })
+        .catch(err => console.log(err));
+    }
+
     if (pictureToFind) {
       getPicture(pictureToFind, currentPage);
     }
@@ -45,28 +67,6 @@ export function App() {
       setTotalPictureFind(null);
     }
   };
-  function getPicture(pic, pg) {
-    const myKey = '25645547-d70858bec2d16a14b7d60bc29';
-    return axios
-      .get(
-        `https://pixabay.com/api/?q=${pic}&page=${pg}&key=${myKey}&image_type=photo&orientation=horizontal&per_page=12`
-      )
-      .then(response => {
-        const foundPictures = response.data.hits.map(
-          ({ id, webformatURL, tags, largeImageURL }) => ({
-            id,
-            webformatURL,
-            tags,
-            largeImageURL,
-          })
-        );
-
-        setPictures([...pictures, ...foundPictures]);
-        setLoading(false);
-        setTotalPictureFind(response.data.totalHits);
-      })
-      .catch(err => console.log(err));
-  }
 
   const handleBtnClick = () => {
     setCurrentPage(currentPage + 1);
