@@ -4,15 +4,14 @@ import styles from './Modal.module.css';
 
 export default function Modal({ currentPicture, closeModal }) {
   useEffect(() => {
+    const handleKeyDown = ({ key }) => {
+      if (key === 'Escape') {
+        closeModal();
+      }
+    };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  const handleKeyDown = ({ key }) => {
-    if (key === 'Escape') {
-      closeModal();
-    }
-  };
+  }, [closeModal]);
 
   const handleClick = e => {
     if (e.target === e.currentTarget) {
